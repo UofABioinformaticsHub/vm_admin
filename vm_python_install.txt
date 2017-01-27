@@ -1,0 +1,31 @@
+For installing python-specific things. But ideally we should be doing some of these via virtualenv
+
+# Install virtualenvwrapper
+pip install --user virtualenvwrapper
+echo "source ~/.local/bin/virtualenvwrapper.sh" >> ~/.bashrc
+
+export WORKON_HOME=~/.virtualenvs
+mkdir $WORKON_HOME
+
+# Add some config stuff to bashrc
+echo "export WORKON_HOME=$WORKON_HOME" >> ~/.bashrc
+echo "export PIP_VIRTUALENV_BASE=$WORKON_HOME" >> ~/.bashrc
+
+# Create py-bioinfo
+mkvirtualenv pybioinfo
+
+# Then install all these packages
+pip install --upgrade pip
+pip install numpy
+pip install Cython
+pip install qiime
+pip install scipy
+pip install jupyter
+pip install macs2
+pip install HTseq
+pip install ruffus
+pip install pysam
+pip install matplotlib
+pip install bx-python
+pip install biopython
+pip install deepTools
