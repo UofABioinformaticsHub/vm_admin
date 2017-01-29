@@ -86,6 +86,7 @@ apt-get -y install autoconf
 apt-get -y install libncurses5-dev
 apt-get -y install curl
 apt-get -y install libgsl0-dev
+apt-get -y install texlive-full
 
 # Fix locale
 sudo dpkg-reconfigure locales
