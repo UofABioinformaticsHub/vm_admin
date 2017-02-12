@@ -21,7 +21,7 @@ gpg -a --export E084DAB9 | sudo apt-key add -
 
 # Install R base
 apt-get -y update
-apt-get -y install r-base \
+apt-get -y install r-base 
 apt-get -y install r-base-dev
 apt-get -y install libcurl4-openssl-dev
 apt-get -y install libpng12-dev
