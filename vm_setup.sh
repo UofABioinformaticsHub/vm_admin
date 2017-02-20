@@ -21,7 +21,7 @@ gpg -a --export E084DAB9 | sudo apt-key add -
 
 # Install R base
 apt-get -y update
-apt-get -y install r-base \
+apt-get -y install r-base
 apt-get -y install r-base-dev
 apt-get -y install libcurl4-openssl-dev
 apt-get -y install libpng12-dev
@@ -81,12 +81,12 @@ apt-get -y install gdebi-core
 # Installing R-Studio. Check the version number first
 wget https://download1.rstudio.org/rstudio-1.0.44-amd64.deb
 gdebi -n rstudio-1.0.44-amd64.deb
-rm rstudio-1.0.44-amd64.deb
+#rm rstudio-1.0.44-amd64.deb
 
 # Setup RStudio Server
 wget https://download2.rstudio.org/rstudio-server-1.0.44-amd64.deb
-gdebi rstudio-server-1.0.44-amd64.deb
-rm rstudio-server-1.0.44-amd64.deb
+gdebi -n rstudio-server-1.0.44-amd64.deb
+#rm rstudio-server-1.0.44-amd64.deb
 
 # Update pip
 pip completion --bash >> ~/.bashrc
@@ -150,8 +150,11 @@ rm /opt/local/*.zip
 git clone https://github.com/lh3/bwa.git && cd bwa && make
 
 # Add new PATH variables
-echo 'export PATH=${PATH}:/opt/local/IGV:/opt/local/bin:/opt/local/bcftools:/opt/local/samtools:/opt/local/Salmon-latest_linux_x86_64/bin:/opt/local/sambamba/build:/opt/local/kallisto:/opt/local/hisat2:/opt/local/bowtie2:/opt/local/tophat:/opt/local/cufflinks:/opt/local/bwa:/opt/local/sratoolkit:/opt/local/stringtie:/opt/local/ucsc-tools" >> ${HOME}/.bashrc
+echo 'export PATH=${PATH}:/opt/local/IGV:/opt/local/bin:/opt/local/bcftools:/opt/local/samtools:/opt/local/Salmon-latest_linux_x86_64/bin:/opt/local/sambamba/build:/opt/local/kallisto:/opt/local/hisat2:/opt/local/bowtie2:/opt/local/tophat:/opt/local/cufflinks:/opt/local/bwa:/opt/local/sratoolkit:/opt/local/stringtie:/opt/local/ucsc-tools"' >> ${HOME}/.bashrc
 
 # reupdate
 apt-get -y update
 apt-get -y upgrade
+
+# restart
+reboot
