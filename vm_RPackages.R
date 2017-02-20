@@ -12,7 +12,7 @@ pkgs <- c("dplyr",
 "biomaRt",
 "Biostrings",
 "BSgenome",
-"DESeq2", 
+"DESeq2",
 "GenomicRanges",
 "GenomicFeatures",
 "Rsubread",
@@ -37,3 +37,4 @@ pkgs <- c("dplyr",
 "pheatmap",
 "devtools")
 biocLite(pkgs)
+biocValid(fix = TRUE)

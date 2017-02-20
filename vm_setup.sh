@@ -6,12 +6,6 @@
 # Fix locale
 apt-get -y install language-pack-en
 
-# Add new hub user and add that user to the hub group
-useradd --shell /bin/bash --create-home --comment "UofA Bioinformatics Hub" hub
-echo -e "hub:hub" | chpasswd
-usermod -aG sudo hub
-chown --recursive hub:hub /home/hub/
-
 # Add the repo to source.list
 echo "deb http://cran.rstudio.com/bin/linux/ubuntu xenial/" | tee -a /etc/apt/sources.list
 
@@ -45,8 +39,6 @@ apt-get -y install git
 apt-get -y install unzip
 apt-get -y install zlib1g-dev
 apt-get -y install ipython-notebook
-apt-get -y install ipython-notebook
-apt-get -y install ipython-notebook
 apt-get -y install virtualenv
 apt-get -y install tabix
 apt-get -y install hdf5-tools
@@ -78,15 +70,16 @@ apt-get -y install texlive
 apt-get -y install xauth
 apt-get -y install gdebi-core
 
-# Installing R-Studio. Check the version number first
-wget https://download1.rstudio.org/rstudio-1.0.44-amd64.deb
-gdebi -n rstudio-1.0.44-amd64.deb
+# Installing R-Studio. Check the version number first - Might not need this
+#wget https://download1.rstudio.org/rstudio-1.0.44-amd64.deb
+#gdebi -n rstudio-1.0.44-amd64.deb
 #rm rstudio-1.0.44-amd64.deb
 
 # Setup RStudio Server
 wget https://download2.rstudio.org/rstudio-server-1.0.44-amd64.deb
 gdebi -n rstudio-server-1.0.44-amd64.deb
 #rm rstudio-server-1.0.44-amd64.deb
+
 
 # Update pip
 pip completion --bash >> ~/.bashrc
@@ -149,12 +142,11 @@ rm /opt/local/*.zip
 # install dev bwa
 git clone https://github.com/lh3/bwa.git && cd bwa && make
 
-# Add new PATH variables
-echo 'export PATH=${PATH}:/opt/local/IGV:/opt/local/bin:/opt/local/bcftools:/opt/local/samtools:/opt/local/Salmon-latest_linux_x86_64/bin:/opt/local/sambamba/build:/opt/local/kallisto:/opt/local/hisat2:/opt/local/bowtie2:/opt/local/tophat:/opt/local/cufflinks:/opt/local/bwa:/opt/local/sratoolkit:/opt/local/stringtie:/opt/local/ucsc-tools"' >> ${HOME}/.bashrc
-
 # reupdate
 apt-get -y update
 apt-get -y upgrade
+
+
 
 # restart
 reboot
