@@ -1,40 +1,10 @@
 #!/usr/bin/Rscript
 
 source("https://bioconductor.org/biocLite.R")
-pkgs <- c("dplyr",
-"reshape2",
-"ggplot2",
-"ggrepel",
-"readr",
-"readxl",
-"tibble",
-"AnnotationHub",
-"biomaRt",
-"Biostrings",
-"BSgenome",
-"DESeq2",
-"GenomicRanges",
-"GenomicFeatures",
-"Rsubread",
-"Rsamtools",
-"rtracklayer",
-"Gviz",
-"ggbio",
-"OmicCircos"
-"Biobase",
-"edgeR",
-"limma",
-"Glimma",
-"xtable",
-"pander",
-"knitr",
-"rmarkdown",
-"lme4",
-"multcomp",
-"scales",
-"stringr",
-"corrplot",
-"pheatmap",
-"devtools")
+pkgs <- c("dplyr","reshape2","ggplot2","ggrepel","readr","readxl","tibble","AnnotationHub",
+          "biomaRt","Biostrings","BSgenome","DESeq2","GenomicRanges","GenomicFeatures",
+          "Rsubread","Rsamtools","rtracklayer","Gviz","ggbio","Biobase","edgeR","limma",
+          "Glimma","xtable","pander","knitr","rmarkdown","lme4","multcomp","scales","stringr",
+          "corrplot","pheatmap","devtools")
 biocLite(pkgs)
 biocValid(fix = TRUE)

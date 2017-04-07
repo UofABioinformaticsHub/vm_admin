@@ -146,7 +146,5 @@ git clone https://github.com/lh3/bwa.git && cd bwa && make
 apt-get -y update
 apt-get -y upgrade
 
-
-
 # restart
 reboot
