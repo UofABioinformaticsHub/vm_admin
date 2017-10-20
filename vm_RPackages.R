@@ -5,6 +5,6 @@ pkgs <- c("dplyr","reshape2","ggplot2","ggrepel","readr","readxl","tibble","Anno
           "biomaRt","Biostrings","BSgenome","DESeq2","GenomicRanges","GenomicFeatures",
           "Rsubread","Rsamtools","rtracklayer","Gviz","ggbio","Biobase","edgeR","limma",
           "Glimma","xtable","pander","knitr","rmarkdown","lme4","multcomp","scales","stringr",
-          "corrplot","pheatmap","devtools")
+          "corrplot","pheatmap","devtools", "tidyverse")
 biocLite(pkgs)
 biocValid(fix = TRUE)
