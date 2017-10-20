@@ -7,6 +7,10 @@ echo "deb http://cran.rstudio.com/bin/linux/ubuntu xenial/" | tee -a /etc/apt/so
 gpg --keyserver keyserver.ubuntu.com --recv-key E084DAB9
 gpg -a --export E084DAB9 | sudo apt-key add -
 
+# Install the latest version of R
+apt-get -y install r-base
+apt-get -y install r-base-dev
+
 # Installing R-Studio. Check the version number first 
 RSVERS=1.1.383
 wget https://download1.rstudio.org/rstudio-${RSVERS}-amd64.deb
