@@ -71,15 +71,15 @@ apt-get -y install xauth
 apt-get -y install gdebi-core
 
 # Installing R-Studio. Check the version number first - Might not need this
-#wget https://download1.rstudio.org/rstudio-1.0.44-amd64.deb
-#gdebi -n rstudio-1.0.44-amd64.deb
-#rm rstudio-1.0.44-amd64.deb
+RSVERS=1.1.383
+wget https://download1.rstudio.org/rstudio-${RSVERS}-amd64.deb
+gdebi --n rstudio-${RSVERS}-amd64.deb
+rm rstudio-${RSVERS}-amd64.deb
 
 # Setup RStudio Server
-wget https://download2.rstudio.org/rstudio-server-1.0.44-amd64.deb
-gdebi -n rstudio-server-1.0.44-amd64.deb
-#rm rstudio-server-1.0.44-amd64.deb
-
+wget https://download2.rstudio.org/rstudio-server-${RSVERS}-amd64.deb
+gdebi --n rstudio-server-${RSVERS}-amd64.deb
+rm rstudio-server-${RSVERS}-amd64.deb
 
 # Update pip
 pip completion --bash >> ~/.bashrc
@@ -101,13 +101,15 @@ mkdir /opt/local/ucsc-tools; cd /opt/local/ucsc-tools
 rsync -aP rsync://hgdownload.cse.ucsc.edu/genome/admin/exe/linux.x86_64/ ./
 
 # Install Salmon
+SALMONVERS=0.8.2
 cd /opt/local
-wget -O salmon.tar.gz https://github.com/COMBINE-lab/salmon/releases/download/v0.8.0/Salmon-0.8.0_linux_x86_64.tar.gz \
+wget -O salmon.tar.gz https://github.com/COMBINE-lab/salmon/releases/download/v${SALMONVERS}/Salmon-${SALMONVERS}_linux_x86_64.tar.gz \
     && tar zxvf salmon.tar.gz
 
 # Install Kallisto
-wget https://github.com/pachterlab/kallisto/releases/download/v0.43.0/kallisto_linux-v0.43.0.tar.gz \
-    && tar xvzf kallisto_linux-v0.43.0.tar.gz && mv kallisto_linux-v0.43.0 kallisto
+KALLISTVERS=0.43.1
+wget https://github.com/pachterlab/kallisto/releases/download/v${KALLISTVERS}/kallisto_linux-v${KALLISTVERS}.tar.gz \
+    && tar xvzf kallisto_linux-v${KALLISTVERS}.tar.gz && mv kallisto_linux-v${KALLISTVERS} kallisto
 
 # Install sambamba
 cd /opt/local
@@ -117,23 +119,32 @@ git clone --recursive https://github.com/lomereiter/sambamba.git \
 
 # Install
 cd /opt/local
-wget -c https://data.broadinstitute.org/igv/projects/downloads/IGV_2.3.90.zip
-wget -c ftp://ftp.ccb.jhu.edu/pub/infphilo/hisat2/downloads/hisat2-2.0.5-Linux_x86_64.zip
-wget -c https://github.com/broadinstitute/picard/releases/download/2.2.2/picard-tools-2.2.2.zip
-wget -c https://ccb.jhu.edu/software/tophat/downloads/tophat-2.1.1.Linux_x86_64.tar.gz
-wget -c http://cole-trapnell-lab.github.io/cufflinks/assets/downloads/cufflinks-2.2.1.Linux_x86_64.tar.gz
-wget -c https://github.com/BenLangmead/bowtie2/releases/download/v2.2.6/bowtie2-2.2.6-linux-x86_64.zip
-wget -c http://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/2.6.2/sratoolkit.2.6.2-ubuntu64.tar.gz
-wget -c http://ccb.jhu.edu/software/stringtie/dl/stringtie-1.3.2b.Linux_x86_64.tar.gz
+IGVERS=2.4.2
+wget -c https://data.broadinstitute.org/igv/projects/downloads/IGV_${IGVERS}.zip
+unzip IGV_${IGVERS}.zip && mv IGV_${IGVERS}.zip IGV
 
-unzip IGV_2.3.90.zip && mv IGV_2.3.90.zip IGV
-unzip hisat2-2.0.5-Linux_x86_64.zip && mv hisat2-2.0.5-Linux_x86_64 hisat2
-unzip picard-tools-2.2.2.zip && mv picard-tools-2.2.2  picard
-unzip bowtie2-2.2.6-linux-x86_64.zip && mv bowtie2-2.2.6 bowtie2
-tar zxvf tophat-2.1.1.Linux_x86_64.tar.gz && mv tophat-2.1.1.Linux_x86_64 tophat
-tar zxvf cufflinks-2.2.1.Linux_x86_64.tar.gz && mv cufflinks-2.2.1.Linux_x86_64 cufflinks
-tar zxvf sratoolkit.2.6.2-ubuntu64.tar.gz && mv sratoolkit.2.6.2-ubuntu64 sratoolkit
-tar zxvf stringtie-1.3.2b.Linux_x86_64.tar.gz && mv stringtie-1.3.2b.Linux_x86_64 stringtie
+HISAT2VERS=2.1.0
+wget -c ftp://ftp.ccb.jhu.edu/pub/infphilo/hisat2/downloads/hisat2-${HISAT2VERS}-source.zip
+unzip hisat2-${HISAT2VERS}-Linux_x86_64.zip && mv hisat2-${HISAT2VERS}-Linux_x86_64 hisat2
+
+PICVERS=2.13.2
+wget -c https://github.com/broadinstitute/picard/archive/${PICVERS}.zip
+unzip picard-${PICVERS}.zip && mv picard-${PICVERS}.zip picard
+
+wget -c https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/current/sratoolkit.current-ubuntu64.tar.gz
+tar zxvf sratoolkit.current-ubuntu64.tar.gz && mv sratoolkit.current-ubuntu64 sratoolkit
+
+STRINGVERS=1.3.3b
+wget -c http://ccb.jhu.edu/software/stringtie/dl/stringtie-${STRINGVERS}.Linux_x86_64.tar.gz
+tar zxvf stringtie-${STRINGVERS}.Linux_x86_64.tar.gz && mv stringtie-${STRINGVERS}.Linux_x86_64 stringtie
+
+# NO LONGER REQUIRED
+#wget -c https://ccb.jhu.edu/software/tophat/downloads/tophat-2.1.1.Linux_x86_64.tar.gz
+#wget -c http://cole-trapnell-lab.github.io/cufflinks/assets/downloads/cufflinks-2.2.1.Linux_x86_64.tar.gz
+#wget -c https://github.com/BenLangmead/bowtie2/releases/download/v2.2.6/bowtie2-2.2.6-linux-x86_64.zip
+#unzip bowtie2-2.2.6-linux-x86_64.zip && mv bowtie2-2.2.6 bowtie2
+#tar zxvf tophat-2.1.1.Linux_x86_64.tar.gz && mv tophat-2.1.1.Linux_x86_64 tophat
+#tar zxvf cufflinks-2.2.1.Linux_x86_64.tar.gz && mv cufflinks-2.2.1.Linux_x86_64 cufflinks
 
 # clean up
 rm /opt/local/*.tar.gz
