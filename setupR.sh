@@ -8,8 +8,8 @@ gpg --keyserver keyserver.ubuntu.com --recv-key E084DAB9
 gpg -a --export E084DAB9 | sudo apt-key add -
 
 # Install the latest version of R
-apt-get -y install r-base
-apt-get -y install r-base-dev
+sudo apt-get update
+sudo apt-get install r-base r-base-dev
 
 # Installing R-Studio. Check the version number first 
 RSVERS=1.1.383
