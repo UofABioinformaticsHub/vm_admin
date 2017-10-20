@@ -1,5 +1,7 @@
 #/bin/bash
 
+# This script needs to be run as superuser
+
 # Add the repo to source.list
 echo "deb http://cran.rstudio.com/bin/linux/ubuntu xenial/" | tee -a /etc/apt/sources.list
 
@@ -8,8 +10,9 @@ gpg --keyserver keyserver.ubuntu.com --recv-key E084DAB9
 gpg -a --export E084DAB9 | sudo apt-key add -
 
 # Install the latest version of R
-sudo apt-get update
-sudo apt-get install r-base r-base-dev
+apt-get update
+apt-get install libcurl4-openssl-dev libssl-dev libxml2-dev
+apt-get install r-base r-base-dev
 
 # Installing R-Studio. Check the version number first 
 RSVERS=1.1.383
