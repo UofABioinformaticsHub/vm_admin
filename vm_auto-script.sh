@@ -108,8 +108,8 @@ if [[ $? != 0 ]]; then
 fi
 killall dpkg
 
-# add CRAN entry to the apt sources. (Ubuntu Xenial 16.04)
-add-apt-repository 'deb https://mirror.aarnet.edu.au/pub/CRAN/bin/linux/ubuntu/ xenial/' 2>>$_logfile
+# add CRAN entry to the apt sources. (Ubuntu Bionic 18.04)
+add-apt-repository 'deb https://mirror.aarnet.edu.au/pub/CRAN/bin/linux/ubuntu/ bionic-cran35/' 2>>$_logfile
 # install apt key and update repository
 gpg --keyserver keyserver.ubuntu.com --recv-key E084DAB9 2>>$_logfile
 gpg -a --export E084DAB9 | apt-key add - 2>>$_logfile
