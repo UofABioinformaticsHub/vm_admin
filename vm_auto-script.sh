@@ -219,7 +219,7 @@ echo "* Installing R and fixes. Fixes come first ...... *" | tee --append $_logf
 #
 apt-get install -y libxml2-dev libssl-dev libcurl4-openssl-dev libmariadb-client-lgpl-dev libssh2-1-dev 2>>$_logfile
 
-apt-get install -y r-base r-base-dev 2>>$_logfile
+apt-get install -y r-base-core r-base-dev 2>>$_logfile
 
 # run Steve's R script to set up bioconductor
 echo "* Starting to set up Bioconductor ...... *" | tee --append $_logfile
