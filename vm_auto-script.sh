@@ -54,8 +54,8 @@ SSH_PUBLIC_KEY='ssh-rsa THISisANexamplePUBLICkey someone@somewhere'
 # aditional conda packages separeted by SPACE
 CONDA_PKGS=''
 
-# R Studio Server (amd64) version check. the lastest was 1.1.419 by 29JAN18.
-RSS_VER=1.1.419
+# R Studio Server (amd64) version check. the lastest was 1.1.453 by 18JUN18.
+RSS_VER=1.1.453
 
 # optional miniconda installation directory. leave empty to use the default "~/miniconda"
 CONDA_DIR=''
