@@ -52,7 +52,7 @@ SUDO_PRIVILIGE=no
 SSH_PUBLIC_KEY='ssh-rsa hub.pub jbreen@LC02K51MKFFT1.ad.adelaide.edu.au'
 
 # aditional conda packages separeted by SPACE
-CONDA_PKGS='freebayes cutadapt'
+CONDA_PKGS='freebayes cutadapt bcftools'
 
 # R Studio Server (amd64) version check. the lastest was 1.1.453 by 18JUN18.
 RSS_VER=1.1.453
@@ -285,6 +285,19 @@ echo -e '* R: user script start *\n' | tee --append $_logfile
 /usr/bin/Rscript <( echo "$R_SCRIPT") 2>>$_logfile
 echo -e '* R: user script finished *\n' | tee --append $_logfile
 echo -e '********************* R finished *********************\n' | tee --append $_logfile
+
+echo -e '***************Setting Up Data For the Session***************' | tee --append $_logfile
+WGS_DIR="/home/$USER_NAME/WGS/01_rawData/fastq"
+mkdir -p $WGS_DIR
+wget -c https://universityofadelaide.box.com/shared/static/23r1szeg3z3wtzcs1my2szw63w8zv7ip.gz -O "$WGS_DIR/subData.tar.gz 2>>$_logfile"
+tar xzvf $WGS_DIR/subData.tar.gz
+rm $WGS_DIR/subData.tar.gz
+mv /home/$USER_NAME/WGS/01_rawData/fastq/chr* /home/$USER_NAME/WGS
+## Should put a file check here...
+
+#wget -c https://universityofadelaide.box.com/shared/static/sdgu5v4m0i63mfybkl3x81dmgwyaikr2.gz -O "/home/$USER_NAME/multiplexed.tar.gz"
+#tar xzvf /home/$USER_NAME/multiplexed.tar.gz
+
 
 
 
