@@ -260,6 +260,31 @@ echo -e '* R: user script start *\n' | tee --append $_logfile
 echo -e '* R: user script finished *\n' | tee --append $_logfile
 echo -e '********************* R finished *********************\n' | tee --append $_logfile
 
+
+echo -e '********************* gophernotes begin *********************' | tee --append $_logfile
+echo "* Starting to set up gophernotes ...... *" | tee --append $_logfile
+
+wget https://dl.google.com/go/go1.10.3.linux-amd64.tar.gz
+tar -C /usr/local -xzf go1.10.3.linux-amd64.tar.gz 2>>$_logfile
+echo 'export PATH=$PATH:/usr/local/go/bin' >> ${_USER_HOME}/.bashrc
+echo 'export GOPATH=$HOME' >> ${_USER_HOME}/.bashrc
+
+apt install python3.5
+pip3 install jupyter 2>>$_logfile
+
+export PATH=$PATH:/usr/local/go/bin
+export GOPATH=${_USER_HOME}
+go get -v github.com/gopherdata/gophernotes 2>>$_logfile
+mkdir -p ${_USER_HOME}/Library/Jupyter/kernels/gophernotes
+cp $GOPATH/src/github.com/gopherdata/gophernotes/kernel/* ${_USER_HOME}/Library/Jupyter/kernels/gophernotes
+chown -hR $USER_NAME:$USER_NAME ${_USER_HOME}
+
+gophernotes 2>>$_logfile
+
+
+echo -e '********************* gophernotes finished *********************\n' | tee --append $_logfile
+
+
 echo -e '***************Setting Up Data For the Session***************' | tee --append $_logfile
 WGS_DIR="/home/$USER_NAME/WGS/01_rawData/fastq"
 mkdir -p $WGS_DIR
