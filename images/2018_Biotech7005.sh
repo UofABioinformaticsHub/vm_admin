@@ -269,6 +269,9 @@ rm $WGS_DIR/subData.tar.gz
 mv /home/$USER_NAME/WGS/01_rawData/fastq/chr* /home/$USER_NAME/WGS
 ## Should put a file check here...
 
+# The permissions for the WGS folder need to be reset for the USER
+chown -hR $USER_NAME:$USER_NAME $_USER_HOME/WGS
+
 #wget -c https://universityofadelaide.box.com/shared/static/sdgu5v4m0i63mfybkl3x81dmgwyaikr2.gz -O "/home/$USER_NAME/multiplexed.tar.gz"
 #tar xzvf /home/$USER_NAME/multiplexed.tar.gz
 
