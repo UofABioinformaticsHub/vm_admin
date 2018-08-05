@@ -289,7 +289,7 @@ echo -e '********************* R finished *********************\n' | tee --appen
 echo -e '***************Setting Up Data For the Session***************' | tee --append $_logfile
 WGS_DIR="/home/$USER_NAME/WGS/01_rawData/fastq"
 mkdir -p $WGS_DIR
-wget -c https://universityofadelaide.box.com/shared/static/23r1szeg3z3wtzcs1my2szw63w8zv7ip.gz -O "$WGS_DIR/subData.tar.gz 2>>$_logfile"
+wget -c https://universityofadelaide.box.com/shared/static/23r1szeg3z3wtzcs1my2szw63w8zv7ip.gz -O "$WGS_DIR/subData.tar.gz" 2>>$_logfile
 tar xzvf $WGS_DIR/subData.tar.gz
 rm $WGS_DIR/subData.tar.gz
 mv /home/$USER_NAME/WGS/01_rawData/fastq/chr* /home/$USER_NAME/WGS
