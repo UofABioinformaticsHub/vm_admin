@@ -36,7 +36,7 @@ SUDO_PRIVILIGE=yes
 SSH_PUBLIC_KEY='ssh-rsa hub.pub jbreen@LC02K51MKFFT1.ad.adelaide.edu.au'
 
 # aditional conda packages separated by SPACE
-CONDA_PKGS='freebayes cutadapt bcftools sabre adapterremoval2'
+CONDA_PKGS='freebayes cutadapt bcftools sabre adapterremoval2 muscle mafft mrbayes jalview gblocks'
 
 # R Studio Server (amd64) version check. the lastest was 1.1.453 by 18JUN18.
 RSS_VER=1.1.453
@@ -167,7 +167,7 @@ echo -e '********************* Bioconda begin *********************' | tee --app
 echo "* Starting to download Miniconda ...... *" | tee --append $_logfile
 wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O $BASEDIR/miniconda.sh 2>>$_logfile
 echo "* Miniconda Downloaded *" | tee --append $_logfile
-# install as user for permission reason
+# install as user for permission reasons
 su $USER_NAME -c "bash ./miniconda.sh -b -p $CONDA_DIR" 2>>$_logfile
 echo -e "\n# added by manual installation of Miniconda on $( date )\nexport PATH=\"$CONDA_DIR/bin:\$PATH\"" >> $_USER_HOME/.bashrc
 export PATH=$CONDA_DIR/bin:$PATH
@@ -181,6 +181,7 @@ conda config --add channels conda-forge 2>>$_logfile
 conda config --add channels bioconda 2>>$_logfile
 conda config --add channels maxibor 2>>$_logfile # Required for adapterremoval
 conda config --add channels serine 2>>$_logfile # Required for sabre
+conda config --add channels biocore 2>>$_logfile # Required for mafft
 echo "* Bioconda channels added *" | tee --append $_logfile
 # update conda
 echo "* Conda update started...... *" | tee --append $_logfile
@@ -195,9 +196,6 @@ conda install --yes $CONDA_PKGS 2>>$_logfile
 echo "* Additional Conda pakages installed if any. *" | tee --append $_logfile
 echo "* Conda package(s) installed *" | tee --append $_logfile
 echo -e '****************** Bioconda finished ******************\n' | tee --append $_logfile
-
-
-
 
 echo -e '********************* R begin *********************' | tee --append $_logfile
 echo "* Installing R and fixes. Fixes come first ...... *" | tee --append $_logfile
@@ -260,47 +258,66 @@ echo -e '* R: user script start *\n' | tee --append $_logfile
 echo -e '* R: user script finished *\n' | tee --append $_logfile
 echo -e '********************* R finished *********************\n' | tee --append $_logfile
 
+echo -e '****************** Installing iPython Notebook ******************\n' | tee --append $_logfile
+apt-get install -y ipython ipython-notebook  2>>$_logfile
+echo -e '*********************  iPython Notebook finished *********************\n' | tee --append $_logfile
+
 
 echo -e '********************* gophernotes begin *********************' | tee --append $_logfile
 echo "* Starting to set up gophernotes ...... *" | tee --append $_logfile
+
+echo "deb http://download.opensuse.org/repositories/network:/messaging:/zeromq:/release-stable/Debian_9.0/ ./" >> /etc/apt/sources.list
+wget https://download.opensuse.org/repositories/network:/messaging:/zeromq:/release-stable/Debian_9.0/Release.key -O- | sudo apt-key add 2>>$_logfile
+apt-get install -y libzmq3-dev 2>>$_logfile
 
 wget https://dl.google.com/go/go1.10.3.linux-amd64.tar.gz
 tar -C /usr/local -xzf go1.10.3.linux-amd64.tar.gz 2>>$_logfile
 echo 'export PATH=$PATH:/usr/local/go/bin' >> ${_USER_HOME}/.bashrc
 echo 'export GOPATH=$HOME' >> ${_USER_HOME}/.bashrc
 
-apt install python3.5
+# This seems to fix some of the issues with installing Jupyter
+apt-get install -y python3-pip locales 2>>$_logfile
+locale-gen en_US.UTF-8
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+export LANGUAGE=en_US.UTF-8
+pip3 install --upgrade pip  2>>$_logfile
 pip3 install jupyter 2>>$_logfile
 
+# This is Steve's attempt to get go running on Jupyter
 export PATH=$PATH:/usr/local/go/bin
 export GOPATH=${_USER_HOME}
 go get -v github.com/gopherdata/gophernotes 2>>$_logfile
-mkdir -p ${_USER_HOME}/Library/Jupyter/kernels/gophernotes
-cp $GOPATH/src/github.com/gopherdata/gophernotes/kernel/* ${_USER_HOME}/Library/Jupyter/kernels/gophernotes
+mkdir -p ${_USER_HOME}/.local/share/jupyter/kernels/gophernotes
+cp $GOPATH/src/github.com/gopherdata/gophernotes/kernel/* ${_USER_HOME}/.local/share/jupyter/kernels/gophernotes
+sed -i "s|gophernotes|${_USER_HOME}/bin/gophernotes|g" ${_USER_HOME}/.local/share/jupyter/kernels/gophernotes/kernel.json
 chown -hR $USER_NAME:$USER_NAME ${_USER_HOME}
+chown -hR $USER_NAME:$USER_NAME ${_USER_HOME}/.local
 
-gophernotes 2>>$_logfile
+# Are we still getting an error here if we specify the corect path?
+${_USER_HOME}/bin/gophernotes 2>>$_logfile
+# I seem to get an error
+## // warning: could not find package "github.com/cosmos72/gomacro" in $GOPATH = "/home/biotech7005", assuming package is located in "/home/biotech7005/src/github.com/cosmos72/gomacro"
 
 
 echo -e '********************* gophernotes finished *********************\n' | tee --append $_logfile
 
 
 echo -e '***************Setting Up Data For the Session***************' | tee --append $_logfile
-WGS_DIR="/home/$USER_NAME/WGS/01_rawData/fastq"
-mkdir -p $WGS_DIR
-wget -c https://universityofadelaide.box.com/shared/static/23r1szeg3z3wtzcs1my2szw63w8zv7ip.gz -O "$WGS_DIR/subData.tar.gz 2>>$_logfile"
-tar xzvf $WGS_DIR/subData.tar.gz
-rm $WGS_DIR/subData.tar.gz
-mv /home/$USER_NAME/WGS/01_rawData/fastq/chr* /home/$USER_NAME/WGS
+NGS_DIR="/home/$USER_NAME/NGS_Practical/01_rawData/fastq"
+mkdir -p $NGS_DIR
+wget -c https://universityofadelaide.box.com/shared/static/nqf2ofb28eao26adxxillvs561w7iy5s.gz -O "$NGS_DIR/subData.tar.gz" 2>>$_logfile
+tar xzvf $NGS_DIR/subData.tar.gz
+rm $NGS_DIR/subData.tar.gz
+mv /home/$USER_NAME/NGS_Practical/01_rawData/fastq/chr* /home/$USER_NAME/NGS_Practical
 ## Should put a file check here...
 
-# The permissions for the WGS folder need to be reset for the USER
-chown -hR $USER_NAME:$USER_NAME $_USER_HOME/WGS
+wget -c https://universityofadelaide.box.com/shared/static/0w0fgnm94w18ixh1z0dkmh5e0xht1ajf.gz -O "$NGS_DIR/multiplexed.tar.gz" 2>>$_logfile
+tar xzvf $NGS_DIR/multiplexed.tar.gz
+rm $NGS_DIR/multiplexed.tar.gz
 
-#wget -c https://universityofadelaide.box.com/shared/static/sdgu5v4m0i63mfybkl3x81dmgwyaikr2.gz -O "/home/$USER_NAME/multiplexed.tar.gz"
-#tar xzvf /home/$USER_NAME/multiplexed.tar.gz
-
-
+# The permissions for the NGS_Practical folder need to be reset for the USER
+chown -hR $USER_NAME:$USER_NAME $_USER_HOME/NGS_Practical
 
 
 ##########################
