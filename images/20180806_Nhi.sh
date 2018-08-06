@@ -9,12 +9,13 @@
 #   This automatic script will...
 #   1) set up new user with password
 #   2) set up ssh for the user with public key
-#   3) download and install Miniconda
-#   4) add Bioconda and necessary channels without R
-#   5) install conda pakages
-#   6) download and install R, RStudio Server
-#   7) set up Bioconductor and install R packages
-#   8) general cleanups
+#   3) setup gedit, sublime & LaTeX
+#   4) download and install Miniconda
+#   5) add Bioconda and necessary channels without R
+#   6) install conda pakages
+#   7) download and install R, RStudio Server & RStudio
+#   8) set up Bioconductor and install R packages
+#   9) general cleanups
 #
 #   * Check /tmp/biohub_init/ for logs before rebooting the vm
 
@@ -96,7 +97,7 @@ if [[ $? != 0 ]]; then
 fi
 killall dpkg
 
-# add CRAN entry to the apt sources. (Ubuntu Bionic 18.04)
+# add CRAN entry to the apt sources. 
 add-apt-repository "deb https://mirror.aarnet.edu.au/pub/CRAN/bin/linux/ubuntu/ ${UBUNTU_VERS}-cran35/" 2>>$_logfile
 # install apt key and update repository
 gpg --keyserver keyserver.ubuntu.com --recv-key E084DAB9 2>>$_logfile
