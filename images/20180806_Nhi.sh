@@ -166,10 +166,10 @@ echo -e "* Installing sublime *" >>$_logfile
 wget -qO - https://download.sublimetext.com/sublimehq-pub.gpg | apt-key add - 2>>$_logfile
 echo "deb https://download.sublimetext.com/ apt/stable/" | tee /etc/apt/sources.list.d/sublime-text.list 2>>$_logfile
 apt-get update 2>>$_logfile
-apt-get install sublime-text 2>>$_logfile
+apt-get install -y sublime-text 2>>$_logfile
 
 # Setup LaTeX
-apt-get install texlive-full texmaker 2>>$_logfile
+apt-get install -y texlive-full texmaker 2>>$_logfile
 
 echo -e '****************** user setup finished ******************\n' | tee --append $_logfile
 
