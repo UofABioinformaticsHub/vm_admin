@@ -11,7 +11,7 @@
 #   2) set up ssh for the user with public key
 #   3) download and install Miniconda
 #   4) add Bioconda and necessary channels without R
-#   5) install conda pakages
+#   5) install conda packages
 #   6) download and install R, RStudio Server
 #   7) set up Bioconductor and install R packages
 #   8) general cleanups
@@ -53,6 +53,9 @@ R_SCRIPT=''
 ####################### housekeeping #################
 ######################################################
 
+apt-get update
+apt-get upgrade -y
+
 BASEDIR="/tmp/biohub_init"
 _logfile="$BASEDIR/auto-script.log"
 _USER_HOME="/home/$USER_NAME"
@@ -71,8 +74,6 @@ if [[ -z $CONDA_DIR ]]; then
 else
     echo "* CONDA DIR is customised as: $CONDA_DIR *" >> $_logfile
 fi
-
-
 
 ####################################################
 ########################  main  ####################
@@ -189,11 +190,11 @@ conda update --yes conda 2>>$_logfile
 echo "*Conda updated *" | tee --append $_logfile
 
 #  install tools in current environment
-echo "* Starting to install Conda pakages. This can take a very long time. *" | tee --append $_logfile
+echo "* Starting to install Conda packages. This can take a very long time. *" | tee --append $_logfile
 conda install --yes $CONDA_PKGS_DEF 2>>$_logfile
-echo "* Default Conda pakages installed. *" | tee --append $_logfile
+echo "* Default Conda packages installed. *" | tee --append $_logfile
 conda install --yes $CONDA_PKGS 2>>$_logfile
-echo "* Additional Conda pakages installed if any. *" | tee --append $_logfile
+echo "* Additional Conda packages installed if any. *" | tee --append $_logfile
 echo "* Conda package(s) installed *" | tee --append $_logfile
 echo -e '****************** Bioconda finished ******************\n' | tee --append $_logfile
 
@@ -266,13 +267,15 @@ echo -e '*********************  iPython Notebook finished *********************\
 echo -e '********************* gophernotes begin *********************' | tee --append $_logfile
 echo "* Starting to set up gophernotes ...... *" | tee --append $_logfile
 
-echo "deb http://download.opensuse.org/repositories/network:/messaging:/zeromq:/release-stable/Debian_9.0/ ./" >> /etc/apt/sources.list
-wget https://download.opensuse.org/repositories/network:/messaging:/zeromq:/release-stable/Debian_9.0/Release.key -O- | sudo apt-key add 2>>$_logfile
-apt-get install -y libzmq3-dev 2>>$_logfile
+apt-get install -y pkg-config 2>>$_logfile
+
+echo "deb http://download.opensuse.org/repositories/network:/messaging:/zeromq:/release-stable/xUbuntu_16.04/ ./" >> /etc/apt/sources.list
+wget https://download.opensuse.org/repositories/network:/messaging:/zeromq:/release-stable/xUbuntu_16.04/Release.key -O- | sudo apt-key add
+apt-get install libzmq3-dev
 
 wget https://dl.google.com/go/go1.10.3.linux-amd64.tar.gz
 tar -C /usr/local -xzf go1.10.3.linux-amd64.tar.gz 2>>$_logfile
-echo 'export PATH=$PATH:/usr/local/go/bin' >> ${_USER_HOME}/.bashrc
+echo 'export PATH=$PATH:$HOME/bin:/usr/local/go/bin' >> ${_USER_HOME}/.bashrc
 echo 'export GOPATH=$HOME' >> ${_USER_HOME}/.bashrc
 
 # This seems to fix some of the issues with installing Jupyter
@@ -281,18 +284,16 @@ locale-gen en_US.UTF-8
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 export LANGUAGE=en_US.UTF-8
-pip3 install --upgrade pip  2>>$_logfile
 pip3 install jupyter 2>>$_logfile
 
-# This is Steve's attempt to get go running on Jupyter
-export PATH=$PATH:/usr/local/go/bin
+export PATH=$PATH:$HOME/bin:/usr/local/go/bin
 export GOPATH=${_USER_HOME}
+go version 2>>$_logfile
 go get -v github.com/gopherdata/gophernotes 2>>$_logfile
-mkdir -p ${_USER_HOME}/.local/share/jupyter/kernels/gophernotes
-cp $GOPATH/src/github.com/gopherdata/gophernotes/kernel/* ${_USER_HOME}/.local/share/jupyter/kernels/gophernotes
-sed -i "s|gophernotes|${_USER_HOME}/bin/gophernotes|g" ${_USER_HOME}/.local/share/jupyter/kernels/gophernotes/kernel.json
+mkdir -p ${_USER_HOME}/Library/Jupyter/kernels/gophernotes
+cp $GOPATH/src/github.com/gopherdata/gophernotes/kernel/* ${_USER_HOME}/Library/Jupyter/kernels/gophernotes
+
 chown -hR $USER_NAME:$USER_NAME ${_USER_HOME}
-chown -hR $USER_NAME:$USER_NAME ${_USER_HOME}/.local
 
 # Are we still getting an error here if we specify the corect path?
 ${_USER_HOME}/bin/gophernotes 2>>$_logfile
