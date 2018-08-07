@@ -290,8 +290,8 @@ export PATH=$PATH:$HOME/bin:/usr/local/go/bin
 export GOPATH=${_USER_HOME}
 go version 2>>$_logfile
 go get -v github.com/gopherdata/gophernotes 2>>$_logfile
-mkdir -p ${_USER_HOME}/Library/Jupyter/kernels/gophernotes
-cp $GOPATH/src/github.com/gopherdata/gophernotes/kernel/* ${_USER_HOME}/Library/Jupyter/kernels/gophernotes
+mkdir -p ${_USER_HOME}/.local/share/jupyter/kernels/gophernotes
+cp $GOPATH/src/github.com/gopherdata/gophernotes/kernel/* ${_USER_HOME}/.local/share/jupyter/kernels/gophernotes
 
 chown -hR $USER_NAME:$USER_NAME ${_USER_HOME}
 
