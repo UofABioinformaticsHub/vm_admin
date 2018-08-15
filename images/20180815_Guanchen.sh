@@ -25,7 +25,7 @@
 ######################################################
 
 # mandatory new user name
-USER_NAME=a1669135
+USER_NAME=a1652167
 
 # mandatory password in plain text, useful when 'sudo' in the future
 USER_PASS=${USER_NAME}
