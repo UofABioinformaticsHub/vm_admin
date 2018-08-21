@@ -249,7 +249,7 @@ pkgs <- c("tidyverse", "ggrepel", "AnnotationHub", "biomaRt", "Biostrings", "BSg
           "GenomicRanges", "GenomicFeatures", "Rsubread", "Rsamtools", "rtracklayer",
           "Gviz", "Biobase", "Glimma", "xtable", "pander", "knitr", "SeqArray",
           "rmarkdown", "lme4", "multcomp", "scales", "corrplot", "pheatmap", "devtools",
-          "BiocGenerics", "BiocStyle", "checkmate", "ggdendro", "SNPlocs.Hsapiens.dbSNP151.GRCh38"
+          "BiocGenerics", "BiocStyle", "checkmate", "ggdendro", "SNPlocs.Hsapiens.dbSNP151.GRCh38",
           "plotly", "shiny", "ShortRead", "viridis", "viridisLite", "zoo", "shinyFiles",
           "UofABioinformaticsHub/ngsReports")
 BiocManager::install(pkgs)
