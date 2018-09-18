@@ -108,12 +108,6 @@ if [[ $? != 0 ]]; then
 fi
 killall dpkg
 
-# add CRAN entry to the apt sources. (Ubuntu Bionic 18.04)
-add-apt-repository 'deb https://mirror.aarnet.edu.au/pub/CRAN/bin/linux/ubuntu/ xenial-cran35/' 2>>$_logfile
-# install apt key and update repository
-gpg --keyserver keyserver.ubuntu.com --recv-key E084DAB9 2>>$_logfile
-gpg -a --export E084DAB9 | apt-key add - 2>>$_logfile
-apt-get update -y &>>$_logfile
 apt-get install -y git-core gdebi-core &>>$_logfile
 echo -e '********************* prep finished *********************\n' | tee --append $_logfile
 
@@ -222,6 +216,12 @@ echo "* Conda package(s) installed *" | tee --append $_logfile
 echo -e '****************** Bioconda finished ******************\n' | tee --append $_logfile
 
 echo -e '***************Installing Sabre***************' | tee --append $_logfile
+# zlib is required to be instaled first
+wget https://zlib.net/zlib-1.2.11.tar.gz 2>>$_logfile
+tar xzvf zlib-1.2.11.tar.gz 
+cd zlib-1.2.11/
+./configure 2>> $_logfile
+make install 2>> $_logfile 
 git clone https://github.com/najoshi/sabre.git
 cd sabre
 make
@@ -237,20 +237,24 @@ wget https://big-sa.github.io/BASH-Intro-2018/files/BDGP6_genes.gtf
 mv BDGP6_genes.gtf /home/$USER_NAME/
 chown $USER_NAME:$USER_NAME /home/$USER_NAME/BDGP6_genes.gtf
 
+mkdir -p ${_USER_HOME}/Refs/Celegans
 
 WGS_DIR="/home/$USER_NAME/WGS/01_rawData/fastq"
-mkdir -p $WGS_DIR
-wget -c https://universityofadelaide.box.com/shared/static/nqf2ofb28eao26adxxillvs561w7iy5s.gz -O "$WGS_DIR/subData.tar.gz" 2>>$_logfile
-tar xzvf $WGS_DIR/subData.tar.gz
-rm $WGS_DIR/subData.tar.gz 2>>$_logfile
-mv /home/$USER_NAME/WGS/01_rawData/fastq/chr* /home/$USER_NAME/WGS
+mkdir -p ${WGS_DIR}
+# For some reason, this will not save to the correct path when specified using ${WGS_DIR}. Below is the best solution to a weird problem
+wget -c https://universityofadelaide.box.com/shared/static/nqf2ofb28eao26adxxillvs561w7iy5s.gz -O subData.tar.gz 2>>$_logfile
+mv subData.tar.gz ${WGS_DIR}/
+tar xzvf ${WGS_DIR}/subData.tar.gz
+rm ${WGS_DIR}/subData.tar.gz 2>>$_logfile
+mv /home/${USER_NAME}/WGS/01_rawData/fastq/chr* ${_USER_HOME}/Refs/Celegans 2>>$_logfile
 ## Should put a file check here...
 
 MULTI_DIR="/home/$USER_NAME/multiplexed/01_rawData/fastq"
-mkdir -p $MULTI_DIR
-wget -c https://universityofadelaide.box.com/shared/static/0w0fgnm94w18ixh1z0dkmh5e0xht1ajf.gz -O "$MULTI_DIR/multiplexed.tar.gz" 2>>$_logfile
-tar xzvf $MULTI_DIR/multiplexed.tar.gz
-rm $MULTI_DIR/multiplexed.tar.gz 2>>$_logfile
+mkdir -p ${MULTI_DIR}
+wget -c https://universityofadelaide.box.com/shared/static/0w0fgnm94w18ixh1z0dkmh5e0xht1ajf.gz -O multiplexed.tar.gz 2>>$_logfile
+mv multiplexed.tar.gz ${MULTI_DIR}/
+tar xzvf ${MULTI_DIR}/multiplexed.tar.gz
+rm ${MULTI_DIR}/multiplexed.tar.gz 2>>$_logfile
 
 echo -e '****************** Data Setup Finished ******************\n' | tee --append $_logfile
 
