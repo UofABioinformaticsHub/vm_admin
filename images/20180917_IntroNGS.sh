@@ -82,8 +82,12 @@ else
     echo "* CONDA DIR is customised as: $CONDA_DIR *" >> $_logfile
 fi
 
-apt-get -y update >>$_logfile
-apt-get -y upgrade >>$_logfile
+# The console-setup wants a response, so run this beforehand to prevent a hang
+echo "console-setup   console-setup/charmap47 select  UTF-8" > encoding.conf
+debconf-set-selections encoding.conf
+rm encoding.conf
+apt-get update &>>$_logfile
+apt-get upgrade -y &>>$_logfile
 
 
 ####################################################
@@ -94,13 +98,13 @@ echo -e '********************* prep begin *********************' | tee --append 
 # complete apt functionality, needed for adding repos
 dpkg -s software-properties-common 2>>$_logfile
 if [[ $? != 0 ]]; then
-    apt-get install -y software-properties-common 2>>$_logfile
+    apt-get install -y software-properties-common &>>$_logfile
 fi
 killall dpkg
 # if ssh-server is not pre-installed, do install
 dpkg -s openssh-server 2>>$_logfile
 if [[ $? != 0 ]]; then
-    apt-get install -y openssh-server 2>>$_logfile
+    apt-get install -y openssh-server &>>$_logfile
 fi
 killall dpkg
 
@@ -109,8 +113,8 @@ add-apt-repository 'deb https://mirror.aarnet.edu.au/pub/CRAN/bin/linux/ubuntu/ 
 # install apt key and update repository
 gpg --keyserver keyserver.ubuntu.com --recv-key E084DAB9 2>>$_logfile
 gpg -a --export E084DAB9 | apt-key add - 2>>$_logfile
-apt-get update -y 2>>$_logfile
-apt-get install -y git-core gdebi-core 2>>$_logfile
+apt-get update -y &>>$_logfile
+apt-get install -y git-core gdebi-core &>>$_logfile
 echo -e '********************* prep finished *********************\n' | tee --append $_logfile
 
 
@@ -155,10 +159,10 @@ systemctl restart ssh 2>>$_logfile
 
 # install xubuntu-desktop and other configurations for the workshop
 echo -e "* Setting up xubuntu *" >>$_logfile
-apt-get install -y xubuntu-desktop 2>>$_logfile
+apt-get install -y xubuntu-desktop &>>$_logfile
 rm /etc/network/if-up.d/avahi-autoipd
-add-apt-repository -y ppa:x2go/stable 2>>$_logfile
-apt-get update 2>>$_logfile
+add-apt-repository -y ppa:x2go/stable &>>$_logfile
+apt-get update &>>$_logfile
 apt-get install -y x2goserver x2goserver-xsession 2>>$_logfile
 # This next line seemed to fix the login problem
 apt-get install -y xfce4-session 2>>$_logfile
@@ -167,7 +171,7 @@ echo 'export XDG_DATA_DIRS=/usr/share/xubuntu:/usr/share/xfce4:/usr/local/share/
 
 # Setup gedit and add a desktop icon
 echo -e "* Installing gedit *" >>$_logfile
-apt-get install -y gedit 2>>$_logfile
+apt-get install -y gedit &>>$_logfile
 # Not sure why this doesn't work
 echo "[Desktop Entry]
 Version=1.0
