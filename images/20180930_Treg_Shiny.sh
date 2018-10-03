@@ -25,7 +25,7 @@
 ######################################################
 
 # mandatory new user name
-USER_NAME=Treg
+USER_NAME=barrylab
 
 # mandatory password in plain text, useful when 'sudo' in the future
 USER_PASS=FOXP3
@@ -156,7 +156,8 @@ echo "* Starting to download Miniconda ...... *" | tee --append $_logfile
 wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O $BASEDIR/miniconda.sh 2>>$_logfile
 echo "* Miniconda Downloaded *" | tee --append $_logfile
 # install as user for permission reasons
-su $USER_NAME -c "bash ./miniconda.sh -b -p $CONDA_DIR" 2>>$_logfile
+#su $USER_NAME -c "bash ./miniconda.sh -b -p $CONDA_DIR" 2>>$_logfile
+bash ./miniconda.sh -b -p $CONDA_DIR 2>>$_logfile
 echo -e "\n# added by manual installation of Miniconda on $( date )\nexport PATH=\"$CONDA_DIR/bin:\$PATH\"" >> $_USER_HOME/.bashrc
 export PATH=$CONDA_DIR/bin:$PATH
 echo "* Miniconda Installed *" | tee --append $_logfile
@@ -178,6 +179,7 @@ echo "* Starting to install Conda pakages. This can take a very long time. *" | 
 conda install --yes $CONDA_PKGS_DEF 2>>$_logfile
 echo "* Default Conda pakages installed. *" | tee --append $_logfile
 conda install --yes $CONDA_PKGS 2>>$_logfile
+chown -hR $USER_NAME:$USER_NAME $CONDA_DIR
 echo "* Additional Conda pakages installed if any. *" | tee --append $_logfile
 echo "* Conda package(s) installed *" | tee --append $_logfile
 echo -e '****************** Bioconda finished ******************\n' | tee --append $_logfile
@@ -217,7 +219,7 @@ apt-get install -y r-base-core r-base-dev 2>>$_logfile
 # run Steve's R script to set up bioconductor
 echo "* Starting to set up Bioconductor ...... *" | tee --append $_logfile
 _R_BIOCONDUCTOR_INS='
-install.packages("BiocManager")
+install.packages(c("BiocManager", "remotes"))
 pkgs <- c("tidyverse", "ggrepel", "AnnotationHub", "biomaRt", "Biostrings", "BSgenome",
           "GenomicRanges", "GenomicFeatures", "Rsubread", "Rsamtools", "rtracklayer",
           "Gviz", "Biobase", "xtable", "pander", "knitr", "SeqArray", "rmarkdown", "scales", 
