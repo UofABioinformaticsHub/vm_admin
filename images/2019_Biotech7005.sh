@@ -260,7 +260,7 @@ echo -e '* R: Bioconductor finished *\n' | tee --append $_logfile
 
 # get RStudio Server
 echo "* Starting to download RStudio Server ...... *" | tee --append $_logfile
-wget https://download2.rstudio.org/rstudio-server-${RSS_VER}-amd64.deb -O $BASEDIR/rstudio.deb 2>>$_logfile
+wget https://download2.rstudio.org/server/trusty/amd64/rstudio-server-${RSS_VER}-amd64.deb -O $BASEDIR/rstudio.deb 2>>$_logfile
 gdebi --non-interactive ./rstudio.deb 2>>$_logfile
 rstudio-server verify-installation 2>>$_logfile
 echo -e "* RStudio Server installation finished. Version: ${RSS_VER} *\n" >>$_logfile
@@ -276,40 +276,40 @@ echo -e '********************* R finished *********************\n' | tee --appen
 # echo -e '*********************  iPython Notebook finished *********************\n' | tee --append $_logfile
 
 
-echo -e '********************* gophernotes begin *********************' | tee --append $_logfile
-echo "* Starting to set up gophernotes ...... *" | tee --append $_logfile
+# echo -e '********************* gophernotes begin *********************' | tee --append $_logfile
+# echo "* Starting to set up gophernotes ...... *" | tee --append $_logfile
 
-apt-get install -y pkg-config 2>>$_logfile
+# apt-get install -y pkg-config 2>>$_logfile
 
-echo "deb http://download.opensuse.org/repositories/network:/messaging:/zeromq:/release-stable/xUbuntu_18.04/ ./" >> /etc/apt/sources.list
-wget https://download.opensuse.org/repositories/network:/messaging:/zeromq:/release-stable/xUbuntu_18.04/Release.key -O- | sudo apt-key add
-apt-get install libzmq3-dev
+# echo "deb http://download.opensuse.org/repositories/network:/messaging:/zeromq:/release-stable/xUbuntu_18.04/ ./" >> /etc/apt/sources.list
+# wget https://download.opensuse.org/repositories/network:/messaging:/zeromq:/release-stable/xUbuntu_18.04/Release.key -O- | sudo apt-key add
+# apt-get install libzmq3-dev
 
-wget https://dl.google.com/go/go1.12.7.linux-amd64.tar.gz
-tar -C /usr/local -xzf go1.12.7.linux-amd64.tar.gz 2>>$_logfile
-echo 'export PATH=$PATH:$HOME/bin:/usr/local/go/bin' >> ${_USER_HOME}/.bashrc
-echo 'export GOPATH=$HOME' >> ${_USER_HOME}/.bashrc
+# wget https://dl.google.com/go/go1.12.7.linux-amd64.tar.gz
+# tar -C /usr/local -xzf go1.12.7.linux-amd64.tar.gz 2>>$_logfile
+# echo 'export PATH=$PATH:$HOME/bin:/usr/local/go/bin' >> ${_USER_HOME}/.bashrc
+# echo 'export GOPATH=$HOME' >> ${_USER_HOME}/.bashrc
 
-# This seems to fix some of the issues with installing Jupyter
-apt-get install -y python3-pip locales 2>>$_logfile
-pip3 install jupyter 2>>$_logfile
+# # This seems to fix some of the issues with installing Jupyter
+# apt-get install -y python3-pip locales 2>>$_logfile
+# pip3 install jupyter 2>>$_logfile
 
-export PATH=$PATH:$HOME/bin:/usr/local/go/bin
-export GOPATH=${_USER_HOME}
-go version 2>>$_logfile
-go get -v github.com/gopherdata/gophernotes 2>>$_logfile
-mkdir -p ${_USER_HOME}/.local/share/jupyter/kernels/gophernotes
-cp $GOPATH/src/github.com/gopherdata/gophernotes/kernel/* ${_USER_HOME}/.local/share/jupyter/kernels/gophernotes
+# export PATH=$PATH:$HOME/bin:/usr/local/go/bin
+# export GOPATH=${_USER_HOME}
+# go version 2>>$_logfile
+# go get -v github.com/gopherdata/gophernotes 2>>$_logfile
+# mkdir -p ${_USER_HOME}/.local/share/jupyter/kernels/gophernotes
+# cp $GOPATH/src/github.com/gopherdata/gophernotes/kernel/* ${_USER_HOME}/.local/share/jupyter/kernels/gophernotes
 
-chown -hR $USER_NAME:$USER_NAME ${_USER_HOME}
+# chown -hR $USER_NAME:$USER_NAME ${_USER_HOME}
 
-# Are we still getting an error here if we specify the corect path?
-${_USER_HOME}/bin/gophernotes 2>>$_logfile
-# I seem to get an error
-## // warning: could not find package "github.com/cosmos72/gomacro" in $GOPATH = "/home/biotech7005", assuming package is located in "/home/biotech7005/src/github.com/cosmos72/gomacro"
+# # Are we still getting an error here if we specify the corect path?
+# ${_USER_HOME}/bin/gophernotes 2>>$_logfile
+# # I seem to get an error
+# ## // warning: could not find package "github.com/cosmos72/gomacro" in $GOPATH = "/home/biotech7005", assuming package is located in "/home/biotech7005/src/github.com/cosmos72/gomacro"
 
 
-echo -e '********************* gophernotes finished *********************\n' | tee --append $_logfile
+# echo -e '********************* gophernotes finished *********************\n' | tee --append $_logfile
 
 
 echo -e '***************Setting Up Data For the Session***************' | tee --append $_logfile
