@@ -224,29 +224,6 @@ echo -e '****************** sabre finished ******************\n' | tee --append 
 echo -e '********************* R begin *********************' | tee --append $_logfile
 echo "* Installing R and fixes. Fixes come first ...... *" | tee --append $_logfile
 
-# fixes for errors are infered from the console log, as also exists in Nectar's vm:
-#
-#   $ cat /var/log/cloud-init-output.log | grep 'deb:'
-#     * deb: libssl-dev (Debian, Ubuntu, etc)
-#     * deb: libcurl4-openssl-dev (Debian, Ubuntu, etc)
-#     * deb: libmariadb-client-lgpl-dev (Debian, Ubuntu 16.04)
-#     ...
-#
-# which are supposedly from these error prompts during R compilation(?):
-#
-#   ... ...
-#   ------------------------- ANTICONF ERROR ---------------------------
-#   Configuration failed because openssl was not found. Try installing:
-# -> * deb: libssl-dev (Debian, Ubuntu, etc)
-#    * rpm: openssl-devel (Fedora, CentOS, RHEL)
-#    * csw: libssl_dev (Solaris)
-#    * brew: openssl@1.1 (Mac OSX)
-#   If openssl is already installed, check that 'pkg-config' is in your
-#   PATH and PKG_CONFIG_PATH contains a openssl.pc file. If pkg-config
-#   is unavailable you can set INCLUDE_DIR and LIB_DIR manually via:
-#   R CMD INSTALL --configure-vars='INCLUDE_DIR=... LIB_DIR=...'
-#   --------------------------------------------------------------------
-#   ... ...
 #
 #
 apt-get install -y libxml2-dev libssl-dev libcurl4-openssl-dev libmariadb-client-lgpl-dev libssh2-1-dev seaview lftp 2>>$_logfile
@@ -262,7 +239,7 @@ echo -e '* R: Bioconductor finished *\n' | tee --append $_logfile
 # get RStudio Server
 echo "* Starting to download RStudio Server ...... *" | tee --append $_logfile
 wget https://download2.rstudio.org/server/trusty/amd64/rstudio-server-${RSS_VER}-amd64.deb -O $BASEDIR/rstudio.deb 2>>$_logfile
-gdebi --non-interactive ./rstudio.deb 2>>$_logfile
+gdebi --non-interactive $BASEDIR/rstudio.deb 2>>$_logfile
 apt-get install -f 2>>$_logfile
 rstudio-server verify-installation 2>>$_logfile
 echo -e "* RStudio Server installation finished. Version: ${RSS_VER} *\n" >>$_logfile
@@ -273,72 +250,33 @@ echo -e '* R: user script start *\n' | tee --append $_logfile
 echo -e '* R: user script finished *\n' | tee --append $_logfile
 echo -e '********************* R finished *********************\n' | tee --append $_logfile
 
-# echo -e '****************** Installing iPython Notebook ******************\n' | tee --append $_logfile
-# apt-get install -y ipython ipython-notebook  2>>$_logfile
-# echo -e '*********************  iPython Notebook finished *********************\n' | tee --append $_logfile
+echo -e '***************Setting Up JBrowse***************' | tee --append $_logfile
+
+# Taken from https://jbrowse.org/docs/installation.html
+apt-get install -y build-essential zlib1g-dev 2>>$_logfile
+curl -L -O https://github.com/GMOD/jbrowse/releases/download/1.16.6-release/JBrowse-1.16.6.zip
+unzip JBrowse-1.16.6.zip
+mv JBrowse-1.16.6 /var/www/html/jbrowse
+cd /var/www/html
+chown $USER_NAME jbrowse
+cd jbrowse
+./setup.sh 2>>$_logfile
+
+echo -e '********************* JBrowse finished *********************\n' | tee --append $_logfile
 
 
-# echo -e '********************* gophernotes begin *********************' | tee --append $_logfile
-# echo "* Starting to set up gophernotes ...... *" | tee --append $_logfile
-
-# apt-get install -y pkg-config 2>>$_logfile
-
-# echo "deb http://download.opensuse.org/repositories/network:/messaging:/zeromq:/release-stable/xUbuntu_18.04/ ./" >> /etc/apt/sources.list
-# wget https://download.opensuse.org/repositories/network:/messaging:/zeromq:/release-stable/xUbuntu_18.04/Release.key -O- | sudo apt-key add
-# apt-get install libzmq3-dev
-
-# wget https://dl.google.com/go/go1.12.7.linux-amd64.tar.gz
-# tar -C /usr/local -xzf go1.12.7.linux-amd64.tar.gz 2>>$_logfile
-# echo 'export PATH=$PATH:$HOME/bin:/usr/local/go/bin' >> ${_USER_HOME}/.bashrc
-# echo 'export GOPATH=$HOME' >> ${_USER_HOME}/.bashrc
-
-# # This seems to fix some of the issues with installing Jupyter
-# apt-get install -y python3-pip locales 2>>$_logfile
-# pip3 install jupyter 2>>$_logfile
-
-# export PATH=$PATH:$HOME/bin:/usr/local/go/bin
-# export GOPATH=${_USER_HOME}
-# go version 2>>$_logfile
-# go get -v github.com/gopherdata/gophernotes 2>>$_logfile
-# mkdir -p ${_USER_HOME}/.local/share/jupyter/kernels/gophernotes
-# cp $GOPATH/src/github.com/gopherdata/gophernotes/kernel/* ${_USER_HOME}/.local/share/jupyter/kernels/gophernotes
-
-# chown -hR $USER_NAME:$USER_NAME ${_USER_HOME}
-
-# # Are we still getting an error here if we specify the corect path?
-# ${_USER_HOME}/bin/gophernotes 2>>$_logfile
-# # I seem to get an error
-# ## // warning: could not find package "github.com/cosmos72/gomacro" in $GOPATH = "/home/biotech7005", assuming package is located in "/home/biotech7005/src/github.com/cosmos72/gomacro"
-
-
-# echo -e '********************* gophernotes finished *********************\n' | tee --append $_logfile
-
-
-echo -e '***************Setting Up Data For the Session***************' | tee --append $_logfile
+echo -e '***************Setting Up Data Sync For the Session***************' | tee --append $_logfile
 
 mkdir $_USER_HOME/data
+chown $USER_NAME $_USER_HOME/data
 echo <<EOF > /usr/local/bin/sync_data
 #!/bin/bash
 /bin/sleep $(/usr/bin/expr $RANDOM % 60)
-lftp -e "lcd ~/data; mirror -c; exit" http://10.150.9.38/biotech/data/
+lftp -e "lcd ~/data; mirror -c; exit" http://10.150.9.38/biotech7005/data/
 EOF
 
 echo '0-59 * * * * /usr/local/bin/sync_data' | crontab -u $USER_NAME -
 
-# NGS_DIR="/home/$USER_NAME/NGS_Practical/01_rawData/fastq"
-# mkdir -p $NGS_DIR
-# wget -c https://universityofadelaide.box.com/shared/static/nqf2ofb28eao26adxxillvs561w7iy5s.gz -O "$NGS_DIR/subData.tar.gz" 2>>$_logfile
-# tar xzvf $NGS_DIR/subData.tar.gz
-# rm $NGS_DIR/subData.tar.gz
-# mv /home/$USER_NAME/NGS_Practical/01_rawData/fastq/chr* /home/$USER_NAME/NGS_Practical
-# ## Should put a file check here...
-
-# wget -c https://universityofadelaide.box.com/shared/static/0w0fgnm94w18ixh1z0dkmh5e0xht1ajf.gz -O "$NGS_DIR/multiplexed.tar.gz" 2>>$_logfile
-# tar xzvf $NGS_DIR/multiplexed.tar.gz
-# rm $NGS_DIR/multiplexed.tar.gz
-
-# # The permissions for the NGS_Practical folder need to be reset for the USER
-# chown -hR $USER_NAME:$USER_NAME $_USER_HOME/NGS_Practical
 
 
 ##########################
