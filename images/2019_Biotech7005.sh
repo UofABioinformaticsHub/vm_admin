@@ -132,6 +132,7 @@ echo -e '********************* user set-up begin ********************' | tee --a
 # add new user
 adduser --quiet --gecos '' --disabled-password --add_extra_groups $USER_NAME
 echo $USER_NAME:$USER_PASS | chpasswd
+passwd -e $USER_NAME 
 # grant sudo privilege
 case $SUDO_PRIVILIGE in
     yes )
@@ -248,7 +249,7 @@ echo "* Installing R and fixes. Fixes come first ...... *" | tee --append $_logf
 #   ... ...
 #
 #
-apt-get install -y libxml2-dev libssl-dev libcurl4-openssl-dev libmariadb-client-lgpl-dev libssh2-1-dev seaview 2>>$_logfile
+apt-get install -y libxml2-dev libssl-dev libcurl4-openssl-dev libmariadb-client-lgpl-dev libssh2-1-dev seaview lftp 2>>$_logfile
 
 apt-get install -y r-base-core r-base-dev 2>>$_logfile
 
@@ -262,6 +263,7 @@ echo -e '* R: Bioconductor finished *\n' | tee --append $_logfile
 echo "* Starting to download RStudio Server ...... *" | tee --append $_logfile
 wget https://download2.rstudio.org/server/trusty/amd64/rstudio-server-${RSS_VER}-amd64.deb -O $BASEDIR/rstudio.deb 2>>$_logfile
 gdebi --non-interactive ./rstudio.deb 2>>$_logfile
+apt-get install -f 2>>$_logfile
 rstudio-server verify-installation 2>>$_logfile
 echo -e "* RStudio Server installation finished. Version: ${RSS_VER} *\n" >>$_logfile
 
@@ -313,6 +315,16 @@ echo -e '********************* R finished *********************\n' | tee --appen
 
 
 echo -e '***************Setting Up Data For the Session***************' | tee --append $_logfile
+
+mkdir $_USER_HOME/data
+echo <<EOF > /usr/local/bin/sync_data
+#!/bin/bash
+/bin/sleep $(/usr/bin/expr $RANDOM % 60)
+lftp -e "lcd ~/data; mirror -c; exit" http://10.150.9.38/biotech/data/
+EOF
+
+echo '0-59 * * * * /usr/local/bin/sync_data' | crontab -u $USER_NAME -
+
 # NGS_DIR="/home/$USER_NAME/NGS_Practical/01_rawData/fastq"
 # mkdir -p $NGS_DIR
 # wget -c https://universityofadelaide.box.com/shared/static/nqf2ofb28eao26adxxillvs561w7iy5s.gz -O "$NGS_DIR/subData.tar.gz" 2>>$_logfile
