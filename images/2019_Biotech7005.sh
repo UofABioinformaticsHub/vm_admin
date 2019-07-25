@@ -4,7 +4,7 @@
 #   Written by Guoyang 'Simon' Zheng <simonchgy@gmail.com>
 #   Updated by S Pederson 2019-07-24
 
-#   This script is designed to be run on instantiation for Ubntu 18.04 (Bionic beaver)
+#   This script is designed to be run on instantiation for Ubuntu 18.04 (Bionic beaver)
 
 #   This automatic script will...
 #   1) set up new user with password
@@ -132,7 +132,8 @@ echo -e '********************* user set-up begin ********************' | tee --a
 # add new user
 adduser --quiet --gecos '' --disabled-password --add_extra_groups $USER_NAME
 echo $USER_NAME:$USER_PASS | chpasswd
-passwd -e $USER_NAME 
+# Automatic requirements for password changing has been disabled as we'll be exclusively using RStudio for access
+# passwd -e $USER_NAME 
 # grant sudo privilege
 case $SUDO_PRIVILIGE in
     yes )
@@ -253,9 +254,13 @@ echo -e '********************* R finished *********************\n' | tee --appen
 echo -e '***************Setting Up JBrowse***************' | tee --append $_logfile
 
 # Taken from https://jbrowse.org/docs/installation.html
-apt-get install -y build-essential zlib1g-dev 2>>$_logfile
-curl -L -O https://github.com/GMOD/jbrowse/releases/download/1.16.6-release/JBrowse-1.16.6.zip
+apt-get install -y build-essential zlib1g-dev apache2 2>>$_logfile
+## Instal node.js
+curl -sL https://deb.nodesource.com/setup_12.x | bash - 2>>$_logfile
+apt-get install -y nodejs 2>>$_logfile
+curl -L -O https://github.com/GMOD/jbrowse/releases/download/1.16.6-release/JBrowse-1.16.6.zip 2>>$_logfile
 unzip JBrowse-1.16.6.zip
+mkdir -p /var/www/html
 mv JBrowse-1.16.6 /var/www/html/jbrowse
 cd /var/www/html
 chown $USER_NAME jbrowse
@@ -268,12 +273,13 @@ echo -e '********************* JBrowse finished *********************\n' | tee -
 echo -e '***************Setting Up Data Sync For the Session***************' | tee --append $_logfile
 
 mkdir $_USER_HOME/data
-chown $USER_NAME $_USER_HOME/data
-echo <<EOF > /usr/local/bin/sync_data
+chown $USER_NAME:$USER_NAME $_USER_HOME/data
+cat <<EOF > /usr/local/bin/sync_data
 #!/bin/bash
 /bin/sleep $(/usr/bin/expr $RANDOM % 60)
 lftp -e "lcd ~/data; mirror -c; exit" http://10.150.9.38/biotech7005/data/
 EOF
+chmod +x /usr/local/bin/sync_data
 
 echo '0-59 * * * * /usr/local/bin/sync_data' | crontab -u $USER_NAME -
 
