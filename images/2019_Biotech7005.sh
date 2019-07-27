@@ -118,10 +118,12 @@ fi
 killall dpkg
 
 # add CRAN entry to the apt sources. (Ubuntu Bionic 18.04)
+apt-key adv --keyserver keyserver.ubuntu.com \
+  --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9 2>>$_logfile
 add-apt-repository 'deb https://mirror.aarnet.edu.au/pub/CRAN/bin/linux/ubuntu/ bionic-cran35/' 2>>$_logfile
 # install apt key and update repository
-gpg --keyserver keyserver.ubuntu.com --recv-key E084DAB9 2>>$_logfile
-gpg -a --export E084DAB9 | apt-key add - 2>>$_logfile
+# gpg --keyserver keyserver.ubuntu.com --recv-key E084DAB9 2>>$_logfile
+# gpg -a --export E084DAB9 | apt-key add - 2>>$_logfile
 apt-get update -y 2>>$_logfile
 apt-get install -y git-core gdebi-core 2>>$_logfile
 echo -e '********************* prep finished *********************\n' | tee --append $_logfile
@@ -229,7 +231,7 @@ echo "* Installing R and fixes. Fixes come first ...... *" | tee --append $_logf
 #
 apt-get install -y libxml2-dev libssl-dev libcurl4-openssl-dev libmariadb-client-lgpl-dev libssh2-1-dev seaview lftp 2>>$_logfile
 
-apt-get install -y r-base-core r-base-dev 2>>$_logfile
+apt-get install -y r-base 2>>$_logfile
 
 # run Steve's R script to set up bioconductor
 echo "* Starting to set up Bioconductor ...... *" | tee --append $_logfile
