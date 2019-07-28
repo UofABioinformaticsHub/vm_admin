@@ -60,12 +60,15 @@ CONDA_PKGS_DEF='bedtools bowtie2 bwa fastqc hisat2 igv kallisto picard sambamba 
 ## Packages for Bioconductor installation
 _R_BIOCONDUCTOR_INS='
 install.packages("BiocManager")
-pkgs <- c("tidyverse", "ggrepel", "AnnotationHub", "biomaRt", "Biostrings", "BSgenome",
-          "DESeq2", "GenomicRanges", "GenomicFeatures", "Rsubread", "Rsamtools", "rtracklayer",
-          "Gviz", "Biobase", "edgeR", "limma", "Glimma", "xtable", "pander", "knitr",
-          "rmarkdown", "lme4", "multcomp", "scales", "corrplot", "pheatmap", "devtools",
-          "BiocGenerics", "BiocStyle", "checkmate", "ggdendro", "plotly", "shiny", "ShortRead", 
-          "viridis", "viridisLite", "zoo", "shinyFiles", "ngsReports")
+pkgs <- c(
+    "AnnotationHub", "Biobase", "BiocGenerics", "BiocStyle", "biomaRt", 
+    "Biostrings", "BSgenome", "checkmate", "corrplot", "DESeq2", "devtools", 
+    "edgeR", "GenomicRanges", "GenomicFeatures", "Glimma",  "ggdendro", "ggrepel", 
+    "Gviz", "here", "knitr", "limma", "lme4", "multcomp",  "ngsReports", "pander", 
+    "pheatmap", "plotly", "rmarkdown", "Rsubread", "Rsamtools", "rtracklayer", 
+    "scales", "shiny", "shinyFiles", "ShortRead", "tidyverse", "viridis", 
+    "viridisLite", "xtable",  "zoo"
+    )
 BiocManager::install(pkgs)
 '
 
