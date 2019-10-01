@@ -252,7 +252,7 @@ chown $USER_NAME:$USER_NAME $_USER_HOME/data
 cat <<EOF > /usr/local/bin/sync_data
 #!/bin/bash
 /bin/sleep $(/usr/bin/expr $RANDOM % 60)
-lftp -e "lcd ~/data; mirror -c; exit" http://10.150.9.38/biotech7005/data/
+lftp -e "lcd ~/data; mirror -c; exit" http://10.150.9.38/sib_2019/
 EOF
 chmod +x /usr/local/bin/sync_data
 
