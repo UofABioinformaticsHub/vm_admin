@@ -25,7 +25,7 @@
 ######################################################
 
 # mandatory new user name
-USER_NAME=biotech7005
+USER_NAME=sib2019
 
 # mandatory password in plain text, useful when 'sudo' in the future
 USER_PASS=${USER_NAME}
@@ -37,10 +37,10 @@ SUDO_PRIVILIGE=yes
 SSH_PUBLIC_KEY='ssh-rsa hub.pub jbreen@LC02K51MKFFT1.ad.adelaide.edu.au'
 
 # aditional conda packages separated by SPACE
-CONDA_PKGS='adapterremoval2 bcftools cutadapt freebayes gblocks jalview mafft mrbayes muscle'
+CONDA_PKGS='adapterremoval2 cutadapt'
 
 # R Studio Server (amd64) version check. the lastest was 1.1.453 by 18JUN18.
-RSS_VER=1.2.1335
+RSS_VER=1.2.5001
 
 # optional miniconda installation directory. leave empty to use the default "~/miniconda"
 CONDA_DIR=''
@@ -54,7 +54,7 @@ R_SCRIPT=''
 BASEDIR="/tmp/biohub_init"
 _logfile="$BASEDIR/auto-script.log"
 _USER_HOME="/home/$USER_NAME"
-CONDA_PKGS_DEF='bedtools bowtie2 bwa fastqc hisat2 igv kallisto picard sambamba samtools star subread'
+CONDA_PKGS_DEF='fastqc picard sambamba samtools star subread'
 
 
 ## Packages for Bioconductor installation
@@ -63,8 +63,9 @@ install.packages("BiocManager")
 pkgs <- c(
     "AnnotationHub", "Biobase", "BiocGenerics", "BiocStyle", "biomaRt", 
     "Biostrings", "BSgenome", "checkmate", "corrplot", "DESeq2", "devtools", 
-    "edgeR", "GenomicRanges", "GenomicFeatures", "Glimma",  "ggdendro", "ggrepel", 
-    "Gviz", "here", "knitr", "limma", "lme4", "multcomp",  "ngsReports", "pander", 
+    "edgeR", "ensembldb", "GenomicRanges", "GenomicFeatures", "Glimma",  "ggdendro", 
+    "ggrepel", "Gviz", "here", "knitr", "limma", "lme4", "multcomp",  "ngsReports", 
+    "org.Mm.eg.db", "pander", 
     "pheatmap", "plotly", "rmarkdown", "Rsubread", "Rsamtools", "rtracklayer", 
     "scales", "shiny", "shinyFiles", "ShortRead", "tidyverse", "viridis", 
     "viridisLite", "xtable",  "zoo"
@@ -195,7 +196,6 @@ conda config --add channels defaults 2>>$_logfile
 conda config --add channels conda-forge 2>>$_logfile
 conda config --add channels bioconda 2>>$_logfile
 conda config --add channels maxibor 2>>$_logfile # Required for adapterremoval
-conda config --add channels biocore 2>>$_logfile # Required for mafft
 echo "* Bioconda channels added *" | tee --append $_logfile
 # update conda
 echo "* Conda update started...... *" | tee --append $_logfile
@@ -215,18 +215,6 @@ conda clean --all 2>>$_logfile
 
 echo -e '****************** Bioconda finished ******************\n' | tee --append $_logfile
 
-# Sabre needs to be installed outside conda as the conda version does not behave correctly
-echo -e '********************* sabre installation  *********************' | tee --append $_logfile
-cd /opt
-wget https://github.com/najoshi/sabre/archive/master.zip
-unzip master.zip
-mv sabre-master sabre
-cd sabre
-make 2>>$_logfile
-cd /usr/local/bin
-ln -s /opt/sabre/sabre ./sabre
-echo -e '****************** sabre finished ******************\n' | tee --append $_logfile
-
 echo -e '********************* R begin *********************' | tee --append $_logfile
 echo "* Installing R and fixes. Fixes come first ...... *" | tee --append $_logfile
 
@@ -244,7 +232,7 @@ echo -e '* R: Bioconductor finished *\n' | tee --append $_logfile
 
 # get RStudio Server
 echo "* Starting to download RStudio Server ...... *" | tee --append $_logfile
-wget https://download2.rstudio.org/server/trusty/amd64/rstudio-server-${RSS_VER}-amd64.deb -O $BASEDIR/rstudio.deb 2>>$_logfile
+wget https://download2.rstudio.org/server/bionic/amd64/rstudio-server-${RSS_VER}-amd64.deb -O $BASEDIR/rstudio.deb 2>>$_logfile
 gdebi --non-interactive $BASEDIR/rstudio.deb 2>>$_logfile
 apt-get install -f 2>>$_logfile
 rstudio-server verify-installation 2>>$_logfile
@@ -256,24 +244,6 @@ echo -e '* R: user script start *\n' | tee --append $_logfile
 echo -e '* R: user script finished *\n' | tee --append $_logfile
 echo -e '********************* R finished *********************\n' | tee --append $_logfile
 
-echo -e '***************Setting Up JBrowse***************' | tee --append $_logfile
-
-# Taken from https://jbrowse.org/docs/installation.html
-apt-get install -y build-essential zlib1g-dev apache2 2>>$_logfile
-## Instal node.js
-curl -sL https://deb.nodesource.com/setup_12.x | bash - 2>>$_logfile
-apt-get install -y nodejs 2>>$_logfile
-curl -L -O https://github.com/GMOD/jbrowse/releases/download/1.16.6-release/JBrowse-1.16.6.zip 2>>$_logfile
-unzip JBrowse-1.16.6.zip
-mkdir -p /var/www/html
-mv JBrowse-1.16.6 /var/www/html/jbrowse
-cd /var/www/html
-chown $USER_NAME jbrowse
-cd jbrowse
-./setup.sh 2>>$_logfile
-
-echo -e '********************* JBrowse finished *********************\n' | tee --append $_logfile
-
 
 echo -e '***************Setting Up Data Sync For the Session***************' | tee --append $_logfile
 
@@ -282,7 +252,7 @@ chown $USER_NAME:$USER_NAME $_USER_HOME/data
 cat <<EOF > /usr/local/bin/sync_data
 #!/bin/bash
 /bin/sleep $(/usr/bin/expr $RANDOM % 60)
-lftp -e "lcd ~/data; mirror -c; exit" http://10.150.9.38/biotech7005/data/
+lftp -e "lcd ~/data; mirror -c; exit" http://10.150.9.38/sib_2019/
 EOF
 chmod +x /usr/local/bin/sync_data
 
