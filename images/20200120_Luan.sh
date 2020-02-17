@@ -4,7 +4,7 @@
 #   Written by Guoyang 'Simon' Zheng <simonchgy@gmail.com>
 #   Updated by S Pederson 2020-01-20
 
-#   This script is designed to be run on instantiation for Ubntu 18.04 (bionic beaver)
+#   This script is designed to be run on instantiation for Ubuntu 18.04 (bionic beaver)
 
 #   This automatic script will...
 #   1) set up new user with password
@@ -36,18 +36,11 @@ SUDO_PRIVILIGE=yes
 # mandatory SSH public key.
 SSH_PUBLIC_KEY='ssh-rsa hub.pub jbreen@LC02K51MKFFT1.ad.adelaide.edu.au'
 
-# aditional conda packages separated by SPACE
-CONDA_PKGS='adapterremoval2 kallisto cutadapt'
-
 # Ubuntu version
 UBUNTU_VERS='bionic'
 
 # R Studio Server (amd64) version check
 RSS_VER=1.2.5033
-
-
-# optional miniconda installation directory. leave empty to use the default "~/miniconda"
-CONDA_DIR=''
 
 # optional R script to be run after RStudio server with Bioconductor is ready.
 R_SCRIPT=''
@@ -61,7 +54,6 @@ R_SCRIPT=''
 BASEDIR="/tmp/biohub_init"
 _logfile="$BASEDIR/auto-script.log"
 _USER_HOME="/home/$USER_NAME"
-CONDA_PKGS_DEF='sambamba star samtools subread bedtools fastqc picard'
 # make base
 if [[ ! -d $BASEDIR ]]; then mkdir -p $BASEDIR; fi
 cd $BASEDIR
@@ -69,14 +61,12 @@ cd $BASEDIR
 date >$_logfile
 echo -e '********************** Start of auto-script *********************\n' | tee --append $_logfile
 
-# by default, miniconda resides in home
-if [[ -z $CONDA_DIR ]]; then
-    CONDA_DIR="$_USER_HOME/miniconda"
-    echo "* CONDA DIR remains default: $CONDA_DIR *" >> $_logfile
-else
-    echo "* CONDA DIR is customised as: $CONDA_DIR *" >> $_logfile
-fi
-
+# Set non-interactive mode
+export DEBIAN_FRONTEND=noninteractive
+# Also set the locales in case this becomes an issue
+apt-get install -y language-pack-en 2>>$_logfile
+locale-gen en_AU.UTF-8
+dpkg-reconfigure locales
 
 
 ####################################################
@@ -87,22 +77,16 @@ echo -e '********************* prep begin *********************' | tee --append 
 # complete apt functionality, needed for adding repos
 dpkg -s software-properties-common 2>>$_logfile
 if [[ $? != 0 ]]; then
-    apt install -y software-properties-common 2>>$_logfile
+    apt-get install -y software-properties-common 2>>$_logfile
 fi
 killall dpkg
 # if ssh-server is not pre-installed, do install
 dpkg -s openssh-server 2>>$_logfile
 if [[ $? != 0 ]]; then
-    apt install -y openssh-server 2>>$_logfile
+    apt-get install -y openssh-server 2>>$_logfile
 fi
 killall dpkg
 
-# add CRAN entry to the apt sources. 
-apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9 2>>$_logfile
-add-apt-repository "deb https://mirror.aarnet.edu.au/pub/CRAN/bin/linux/ubuntu/ ${UBUNTU_VERS}-cran35/" 2>>$_logfile
-# install apt key and update repository
-apt update -y 2>>$_logfile
-apt install -y git-core gdebi-core 2>>$_logfile
 echo -e '********************* prep finished *********************\n' | tee --append $_logfile
 
 
@@ -148,71 +132,22 @@ systemctl restart ssh 2>>$_logfile
 echo -e '****************** user setup finished ******************\n' | tee --append $_logfile
 
 
-
-echo -e '********************* Bioconda begin *********************' | tee --append $_logfile
-# download and install Miniconda
-echo "* Starting to download Miniconda ...... *" | tee --append $_logfile
-wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O $BASEDIR/miniconda.sh 2>>$_logfile
-echo "* Miniconda Downloaded *" | tee --append $_logfile
-# install as user for permission reasons
-su $USER_NAME -c "bash ./miniconda.sh -b -p $CONDA_DIR" 2>>$_logfile
-echo -e "\n# added by manual installation of Miniconda on $( date )\nexport PATH=\"$CONDA_DIR/bin:\$PATH\"" >> $_USER_HOME/.bashrc
-export PATH=$CONDA_DIR/bin:$PATH
-echo "* Miniconda Installed *" | tee --append $_logfile
-
-# make sure r is not in channels
-conda config --remove channels r 2>>$_logfile
-# add bioconda channels
-conda config --add channels defaults 2>>$_logfile
-conda config --add channels conda-forge 2>>$_logfile
-conda config --add channels bioconda 2>>$_logfile
-conda config --add channels maxibor 2>>$_logfile # Required for adapterremoval
-echo "* Bioconda channels added *" | tee --append $_logfile
-# update conda
-echo "* Conda update started...... *" | tee --append $_logfile
-conda update --yes conda 2>>$_logfile
-echo "*Conda updated *" | tee --append $_logfile
-
-#  install tools in current environment
-echo "* Starting to install Conda pakages. This can take a very long time. *" | tee --append $_logfile
-conda install --yes $CONDA_PKGS_DEF 2>>$_logfile
-echo "* Default Conda pakages installed. *" | tee --append $_logfile
-conda install --yes $CONDA_PKGS 2>>$_logfile
-echo "* Additional Conda pakages installed if any. *" | tee --append $_logfile
-echo "* Conda package(s) installed *" | tee --append $_logfile
-echo -e '****************** Bioconda finished ******************\n' | tee --append $_logfile
-
 echo -e '********************* R begin *********************' | tee --append $_logfile
 echo "* Installing R and fixes. Fixes come first ...... *" | tee --append $_logfile
 
-# fixes for errors are infered from the console log, as also exists in Nectar's vm:
-#
-#   $ cat /var/log/cloud-init-output.log | grep 'deb:'
-#     * deb: libssl-dev (Debian, Ubuntu, etc)
-#     * deb: libcurl4-openssl-dev (Debian, Ubuntu, etc)
-#     * deb: libmariadb-client-lgpl-dev (Debian, Ubuntu 16.04)
-#     ...
-#
-# which are supposedly from these error prompts during R compilation(?):
-#
-#   ... ...
-#   ------------------------- ANTICONF ERROR ---------------------------
-#   Configuration failed because openssl was not found. Try installing:
-# -> * deb: libssl-dev (Debian, Ubuntu, etc)
-#    * rpm: openssl-devel (Fedora, CentOS, RHEL)
-#    * csw: libssl_dev (Solaris)
-#    * brew: openssl@1.1 (Mac OSX)
-#   If openssl is already installed, check that 'pkg-config' is in your
-#   PATH and PKG_CONFIG_PATH contains a openssl.pc file. If pkg-config
-#   is unavailable you can set INCLUDE_DIR and LIB_DIR manually via:
-#   R CMD INSTALL --configure-vars='INCLUDE_DIR=... LIB_DIR=...'
-#   --------------------------------------------------------------------
-#   ... ...
-#
-#
-apt install -y libxml2-dev libssl-dev libcurl4-openssl-dev libmariadb-client-lgpl-dev libssh2-1-dev 2>>$_logfile
 
-apt install -y r-base-core r-base-dev 2>>$_logfile
+# add CRAN entry to the apt sources. 
+echo -e "Adding keyserver for R" | tee --append $_logfile
+apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9 
+echo -e "Adding CRAN repository" | tee --append $_logfile
+add-apt-repository "deb https://mirror.aarnet.edu.au/pub/CRAN/bin/linux/ubuntu/ ${UBUNTU_VERS}-cran35/" 2>>$_logfile
+# install apt key and update repository
+apt-get update -y 2>>$_logfile
+
+echo -e "Installing dependencies" | tee --append $_logfile
+apt-get install -y libxml2-dev libssl-dev libcurl4-openssl-dev libmariadb-client-lgpl-dev libssh2-1-dev 2>>$_logfile
+echo -e "Installing R" | tee --append $_logfile
+apt-get install -y git gdebi-core r-base-core r-base-dev 2>>$_logfile
 
 # run Steve's R script to set up bioconductor
 echo "* Starting to set up Bioconductor ...... *" | tee --append $_logfile
@@ -221,8 +156,8 @@ install.packages("BiocManager")
 pkgs <- c("tidyverse", "ggrepel", "AnnotationHub", "biomaRt", "Biostrings", "BSgenome",
           "GenomicRanges", "GenomicFeatures", "Rsubread", "Rsamtools", "rtracklayer",
           "Gviz", "Biobase", "edgeR", "limma", "Glimma", "xtable", "pander", "knitr",
-          "rmarkdown", "scales", "corrplot", "pheatmap", "devtools", "networkD3", "igraph"
-          "BiocGenerics", "BiocStyle", "checkmate", "ggdendro", "tinytex", "roxygen2"
+          "rmarkdown", "scales", "corrplot", "pheatmap", "devtools", "networkD3", "igraph",
+          "BiocGenerics", "BiocStyle", "checkmate", "ggdendro", "tinytex", "roxygen2",
           "plotly", "shiny", "shinyFiles", "ngsReports", "strandCheckR")
 BiocManager::install(pkgs)
 tinytex::install_tinytex()
@@ -237,16 +172,7 @@ gdebi --non-interactive ./rstudio-server.deb 2>>$_logfile
 rstudio-server verify-installation 2>>$_logfile
 echo -e "* RStudio Server installation finished. Version: ${RSS_VER} *\n" >>$_logfile
 
-# get RStudio Standalone
-echo "* Starting to download RStudio ...... *" | tee --append $_logfile
-wget https://download1.rstudio.org/rstudio-${UBUNTU_VERS}-${RSS_VER}-amd64.deb -O $BASEDIR/rstudio.deb 2>>$_logfile
-gdebi --non-interactive ./rstudio.deb 2>>$_logfile
-echo -e "* RStudio installation finished. Version: ${RSS_VER} *\n" >>$_logfile
 
-# run user script
-echo -e '* R: user script start *\n' | tee --append $_logfile
-/usr/bin/Rscript <( echo "$R_SCRIPT") 2>>$_logfile
-echo -e '* R: user script finished *\n' | tee --append $_logfile
 echo -e '********************* R finished *********************\n' | tee --append $_logfile
 
 
@@ -261,9 +187,6 @@ echo "Script ran to the end.
 PWD=$PWD
 PATH=$PATH
 USER_NAME=$USER_NAME
-CONDA_PKGS_DEF=$CONDA_PKGS_DEF
-CONDA_PKGS=$CONDA_PKGS
-CONDA_DIR=$CONDA_DIR
 New User's Groups=$( groups $USER_NAME )" >$BASEDIR/auto-script-finished.log
 
 date >> $_logfile
